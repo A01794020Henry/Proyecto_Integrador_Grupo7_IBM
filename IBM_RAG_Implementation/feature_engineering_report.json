@@ -1,0 +1,105 @@
+{
+  "timestamp": "2025-10-19T17:33:47.499362",
+  "pipeline_version": "1.0.0",
+  "dataset_statistics": {
+    "total_records": 7,
+    "document_types": {
+      "evento_can": 5,
+      "documentacion_tecnica": 2
+    },
+    "text_length_stats": {
+      "mean": 663.5714285714286,
+      "std": 108.24179282645736,
+      "min": "488",
+      "max": "858"
+    },
+    "redes_can": {
+      "CAN_CUSTOM_31": 5,
+      "DOCUMENTACION": 2
+    },
+    "eventos_vehiculo": {
+      "carga": 5,
+      "referencia_tecnica": 2
+    },
+    "cleaning_impact": {
+      "avg_reduction_chars": 9.714285714285714,
+      "cleaning_ratio": 0.9850202269163244
+    },
+    "quality_filtering": {
+      "records_before": 7,
+      "records_after": 7,
+      "filtered_out": 0,
+      "retention_rate": 1.0
+    }
+  },
+  "configuration": {
+    "chunk_size": 512,
+    "chunk_overlap": 50,
+    "quality_threshold": 0.6,
+    "min_text_length": 100,
+    "max_text_length": 2000
+  },
+  "final_dataset": {
+    "total_records": 7,
+    "columns": [
+      "id",
+      "text",
+      "document_type",
+      "metadata",
+      "technical_density_score",
+      "word_count",
+      "complexity_score"
+    ],
+    "sample_record": {
+      "id": "CAN_CUSTOM_31_evento_0",
+      "text": "Evento en red CAN_CUSTOM_31 (Segmento 0): - En el sistema CAN, análisis de estabilidad temporal: voltaje_carga_v mostró variación contenida de 36.00 v respecto al valor nominal registrado en blf. - En el sistema CAN, patrón de decremento detectado: corriente_carga_a redujo su valor en -51.2% según los logs blf procesados del sistema vehicular. - En el sistema CAN, comportamiento estable registrado: temperatura_cargador_c osciló minimamente alrededor de 34.78 °c según logs temporales del vehículo. - En el sistema CAN, análisis de estabilidad temporal: dlc mostró variación contenida de 0.00 unidades respecto al valor nominal registrado en blf.",
+      "document_type": "evento_can",
+      "metadata": {
+        "timestamp_inicio": "2024-01-01T00:00:00",
+        "timestamp_fin": "2024-01-01T00:00:30",
+        "duracion_segundos": 30.0,
+        "red_can": "CAN_CUSTOM_31",
+        "senales_involucradas": [
+          "Voltaje_Carga_V",
+          "Corriente_Carga_A",
+          "Temperatura_Cargador_C",
+          "DLC"
+        ],
+        "evento_vehiculo": "carga",
+        "intensidad": "medio",
+        "contexto_operativo": "estacionado",
+        "meta_timestamp_inicio": "2024-01-01 00:00:00",
+        "meta_timestamp_fin": "2024-01-01T00:00:30",
+        "meta_duracion_segundos": 30.0,
+        "meta_red_can": "CAN_CUSTOM_31",
+        "meta_senales_involucradas": [
+          "Voltaje_Carga_V",
+          "Corriente_Carga_A",
+          "Temperatura_Cargador_C",
+          "DLC"
+        ],
+        "meta_evento_vehiculo": "carga",
+        "meta_intensidad": "medio",
+        "meta_contexto_operativo": "estacionado",
+        "meta_hora_dia": 0,
+        "meta_dia_semana": 0,
+        "meta_categoria_duracion": "corta",
+        "meta_num_senales": 4,
+        "meta_complejidad_evento": "moderado",
+        "density_voltaje": 1,
+        "density_corriente": 0,
+        "density_temperatura": 1,
+        "density_porcentaje": 1,
+        "density_tiempo": 0,
+        "mentions_can_ev": 0,
+        "mentions_can_catl": 0,
+        "mentions_can_carroc": 0,
+        "mentions_can_custom": 1,
+        "mentions_aux_chg": 0
+      },
+      "technical_density_score": 0.031578947368421054,
+      "word_count": 95,
+      "complexity_score": 0.12631578947368421
+    }
+  }
+}
