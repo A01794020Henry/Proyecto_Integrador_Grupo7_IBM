@@ -1,0 +1,39 @@
+# Instalación de dependencias IBM watsonx para DECODE-EV RAG
+# requirements.txt para el proyecto de implementación RAG
+
+# IBM watsonx y Watson Services
+ibm-watson-machine-learning>=1.0.362
+ibm-watson>=7.0.1
+ibm-cloud-sdk-core>=3.16.7
+
+# Vector Stores y Embeddings
+sentence-transformers>=2.2.2
+chromadb>=0.4.15
+pymilvus>=2.3.1
+faiss-cpu>=1.7.4
+
+# Procesamiento de datos
+pandas>=2.0.3
+numpy>=1.24.3
+jsonlines>=3.1.0
+
+# LangChain para RAG
+langchain>=0.1.0
+langchain-community>=0.0.13
+langchain-ibm>=0.1.0
+
+# Utilerías adicionales
+python-dotenv>=1.0.0
+requests>=2.31.0
+tqdm>=4.66.1
+
+# Desarrollo y testing
+pytest>=7.4.0
+black>=23.7.0
+isort>=5.12.0
+
+# Documentación
+jupyter>=1.0.0
+ipywidgets>=8.1.0
+matplotlib>=3.7.2
+seaborn>=0.12.2
