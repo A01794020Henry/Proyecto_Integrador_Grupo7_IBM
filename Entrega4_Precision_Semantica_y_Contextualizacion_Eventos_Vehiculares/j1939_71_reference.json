@@ -1,0 +1,2457 @@
+{
+  "metadata": {
+    "standard": "SAE J1939-71",
+    "description": "Capa de Aplicación J1939: directrices, definiciones de SPN/PGN y campos para enlazar con DBC. Archivo de referencia para modelos RAG.",
+    "source_document": "Entrega4_Precision_Semantica_y_Contextualizacion_Eventos_Vehiculares/J1939-71.pdf",
+    "created_at": "2025-10-27T02:01:55Z",
+    "language": "es",
+    "schema_version": "1.0.0"
+  },
+  "guidelines": {
+    "signal_characterization": {
+      "latency_recommendations": "Minimizar la latencia entre adquisición y transmisión. Documentar latencia y jitter esperados por parámetro.",
+      "time_base": "Algunos PGN dependen del ángulo del cigüeñal/velocidad de motor (sincronizados a fase)."
+    },
+    "message_format": {
+      "pgn": "El Número de Grupo de Parámetros (PGN) identifica el mensaje y su contenido lógico.",
+      "data_types": [
+        "ASCII (ISO/IEC 8859-1 / Latin-1)",
+        "Datos escalados (factor + offset)",
+        "Estados de función (bitfields/enumeraciones)"
+      ],
+      "byte_order": "Little-endian (LSB primero) salvo indicación contraria en el SPN/PGN.",
+      "measured_vs_state": "Cada SPN se clasifica como 'Medido' o 'Estado'."
+    },
+    "charset": {
+      "name": "ISO/IEC 8859-1 (Latin-1)",
+      "notes": "Para campos de texto/ASCII se recomienda Latin-1. Limitar a ASCII imprimible cuando aplique."
+    },
+    "parameter_ranges": {
+      "general": "Definir rango válido, valores para 'no disponible' y 'error/indeterminado' según el tipo de dato.",
+      "common_conventions": [
+        "Para 1 byte: 0..254 suelen mapear a valores/estados válidos, y 255 (0xFF) suele indicar 'no disponible'.",
+        "Para múltiples bytes escalados: usar todo el rango útil, reservando el máximo para 'no disponible' cuando aplique.",
+        "Los valores exactos de 'error'/'no disponible' pueden ser específicos del SPN; ver la definición del SPN."
+      ]
+    },
+    "slot_allocation": {
+      "scaling": "Definir resolución (factor), offset y límites. Preferir escalas que maximicen el uso del rango sin saturación.",
+      "limits_and_offsets": "Explicitar min/max físicos y el offset aplicado."
+    },
+    "adding_parameters_to_groups": {
+      "grouping": "Agregar nuevos parámetros a PGNs existentes cuando sea lógico; mantener posiciones y alineación de bytes/bits estables.",
+      "compatibility": "Evitar romper compatibilidad hacia atrás; documentar cambios en posiciones/tamaños."
+    },
+    "transmission_rates": {
+      "nominal_rates": [
+        "10 ms",
+        "20 ms",
+        "100 ms",
+        "1 s",
+        "a demanda"
+      ],
+      "notes": [
+        "Elegir tasas periódicas vs. por evento según la dinámica del parámetro.",
+        "Mensajes dependientes del cigüeñal se envían conforme a la velocidad del motor."
+      ]
+    },
+    "naming_conventions": {
+      "multi_component": "Para parámetros con múltiples instancias, añadir índice/ubicación (ej.: 'temperatura_escape_1', 'temperatura_escape_2').",
+      "clarity": "Mantener nombres consistentes con J1939 para facilitar el cruce con DBC/SPN."
+    },
+    "multi_source_notes": {
+      "source_priority": "Si un parámetro tiene múltiples fuentes (ECU diferentes), definir reglas de prioridad y reconciliación.",
+      "provenance": "Registrar la ECU origen (Source Address) y la estrategia de selección."
+    }
+  },
+  "dbc_linkage": {
+    "can_id_composition": "ID 29 bits = Prioridad(3) | Reservado(1) | Data Page(1) | PDU Format(8) | PDU Specific(8) | Source Address(8)",
+    "fields_mapping": {
+      "dbc_message": {
+        "name": "Nombre del mensaje en DBC (habitualmente el nombre del PGN)",
+        "can_id": "Identificador CAN extendido de 29 bits",
+        "pgn": "Número PGN",
+        "source_address": "0-255",
+        "pdu_format": "0-255",
+        "pdu_specific": "0-255",
+        "priority": "0-7"
+      },
+      "dbc_signal": {
+        "name": "Nombre de la señal en DBC (alineado con nombre SPN)",
+        "spn": "Número SPN",
+        "start_bit": "Bit de inicio (convención Intel/little-endian)",
+        "length": "Longitud en bits",
+        "endianness": "Intel (little-endian) salvo indicación contraria",
+        "scale": "Factor (resolución)",
+        "offset": "Offset",
+        "min": "Mínimo físico",
+        "max": "Máximo físico",
+        "units": "Unidades"
+      }
+    },
+    "matching_strategy": [
+      "Cruzar por SPN (clave primaria semántica).",
+      "Verificar unidades, resolución y offset.",
+      "Usar nombre del PGN y señal como respaldo, cuidando sinónimos.",
+      "Confirmar posiciones (start_bit/length) desde el DBC, no desde este archivo."
+    ]
+  },
+  "spns": [
+    {
+      "spn": 100,
+      "name": "Engine Oil Pressure",
+      "description": "Gage pressure of oil in engine lubrication system as provided by oil pump.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 4.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 1000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65263
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 101,
+      "name": "Crankcase Pressure",
+      "description": "Gage pressure inside engine crankcase.",
+      "units": null,
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": null,
+      "type": "Medido",
+      "pgns": [
+        65263
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 102,
+      "name": "Boost Pressure",
+      "description": "Gage pressure of air measured downstream on the compressor discharge side of the turbocharger. See also SPNs 1127-1130 for alternate range and resolution. If there is one boost pressure to report and this range and resolution is adequate, this parameter should be used.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 2.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 500.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 103,
+      "name": "Turbocharger 1 Speed",
+      "description": "Rotational velocity of rotor in the turbocharger.",
+      "units": "rpm",
+      "data_length_bits": 16,
+      "resolution": 4.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 257020.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65245
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 104,
+      "name": "Turbocharger Lube Oil Pressure 1",
+      "description": "Gage pressure of oil in turbocharger lubrication system. Data Length: 1 byte Resolution: 4 kPa/bit , 0 offset Data Range: 0 to 1000 kPa Type: Measured Suspect Parameter Number: 104 Parameter Group Number: [65245] Vehicle Application Layer - J1939-71 (through December 2001) - p. 37 spn105 - Intake Manifold 1 Temperature - Temperature of pre-combustion air found in intake manifold of engine air supply system.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 106,
+      "name": "Air Inlet Pressure",
+      "description": "Absolute air pressure at inlet to intake manifold or air box.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 2.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 500.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 107,
+      "name": "Air Filter 1 Differential Pressure",
+      "description": "Change in engine air system pressure, measured across the filter, due to the filter and any accumulation of solid foreign matter on or in the filter. This is the measurement of the first filter in a multiple air filter system. In a single air filter application, this is the only SPN used. Filter numbering follows the guidelines noted in section, Naming Convention For Engine Parameters.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 0.05,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 12.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 108,
+      "name": "Barometric Pressure",
+      "description": "Absolute air pressure of the atmosphere. See Figures SPN16_A & SPN16_B.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 125.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65269
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 109,
+      "name": "Coolant Pressure",
+      "description": "Gage pressure of liquid found in engine cooling system. Data Length: 1 byte Resolution: 2 kPa/bit , 0 offset Data Range: 0 to 500 kPa Type: Measured Suspect Parameter Number: 109 Parameter Group Number: [65263] Vehicle Application Layer - J1939-71 (through December 2001) - p. 38 spn110 - Engine Coolant Temperature - Temperature of liquid found in engine cooling system.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65262
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 111,
+      "name": "Coolant Level",
+      "description": "Ratio of volume of liquid found in engine cooling system to total cooling system volume. Typical monitoring location is in the coolant expansion tank.",
+      "units": "%",
+      "data_length_bits": 8,
+      "resolution": 0.4,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 100.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65263
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 112,
+      "name": "Coolant Filter Differential Pressure",
+      "description": "Change in coolant pressure, measured across the filter, due to the filter and any accumulation of solid or semisolid matter on or in the filter.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 125.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 114,
+      "name": "Net Battery Current",
+      "description": "Net flow of electrical current into/out of the battery or batteries.",
+      "units": "A",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -125.0,
+        "max": 125.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 115,
+      "name": "Alternator Current",
+      "description": "Measure of electrical current flow from the alternator. Alternator Current (High Range/Resolution) parameter SPN 1795 has a higher range and resolution of the same parameter.",
+      "units": "A",
+      "data_length_bits": 8,
+      "resolution": 1.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 250.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 110,
+      "name": "Engine Coolant Temperature",
+      "description": "Temperature of liquid found in engine cooling system.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65262
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 111,
+      "name": "Coolant Level",
+      "description": "Ratio of volume of liquid found in engine cooling system to total cooling system volume. Typical monitoring location is in the coolant expansion tank.",
+      "units": "%",
+      "data_length_bits": 8,
+      "resolution": 0.4,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 100.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65263
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 112,
+      "name": "Coolant Filter Differential Pressure",
+      "description": "Change in coolant pressure, measured across the filter, due to the filter and any accumulation of solid or semisolid matter on or in the filter.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 125.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 114,
+      "name": "Net Battery Current",
+      "description": "Net flow of electrical current into/out of the battery or batteries.",
+      "units": "A",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -125.0,
+        "max": 125.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 115,
+      "name": "Alternator Current",
+      "description": "Measure of electrical current flow from the alternator. Alternator Current (High Range/Resolution) parameter SPN 1795 has a higher range and resolution of the same parameter.",
+      "units": "A",
+      "data_length_bits": 8,
+      "resolution": 1.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 250.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 116,
+      "name": "Brake Application Pressure",
+      "description": "Gage pressure of compressed air or fluid in vehicle braking system measured at Vehicle Application Layer - J1939-71 (through December 2001) - p. 39 the brake chamber when brake shoe (or pad) is placed against brake drum (or disc).",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 4.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 1000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65274
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 117,
+      "name": "Brake Primary Pressure",
+      "description": "Gage pressure of air in the primary, or supply side, of the air brake system.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 4.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 1000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65274
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 118,
+      "name": "Brake Secondary Pressure",
+      "description": "Gage pressure of air in the secondary, or service side, of the air brake system.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 4.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 1000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65274
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 119,
+      "name": "Hydraulic Retarder Pressure",
+      "description": "Gage pressure of oil in hydraulic retarder system.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 16.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 4000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65275
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 120,
+      "name": "Hydraulic Retarder Oil Temperature",
+      "description": "Temperature of oil found in a hydraulic retarder.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65275
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 123,
+      "name": "Clutch Pressure",
+      "description": "Gage pressure of oil within a wet clutch. Data Length: 1 byte Resolution: 16 kPa/bit , 0 offset Data Range: 0 to 4000 kPa Vehicle Application Layer - J1939-71 (through December 2001) - p. 40 Type: Measured Suspect Parameter Number: 123 Parameter Group Number: [65272] spn124 - Transmission Oil Level - Ratio of volume of transmission sump oil to recommended volume.",
+      "units": "%",
+      "data_length_bits": 8,
+      "resolution": 0.4,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 100.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65272
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 126,
+      "name": "Transmission Filter Differential Pressure",
+      "description": "Change in transmission fluid pressure, measured after the filter, due to accumulation of solid or semisolid material on or in the filter.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 2.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 500.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65272
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 127,
+      "name": "Transmission Oil Pressure",
+      "description": "Gage pressure of lubrication fluid in transmission, measured after pump.",
+      "units": "kPa",
+      "data_length_bits": 8,
+      "resolution": 16.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 4000.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65272
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 129,
+      "name": "Injector Metering Rail 2 Pressure (duplicate, use 1349)",
+      "description": "The gage pressure of fuel in the metering rail #2 as delivered from the supply pump to the injector metering inlet. See Figure SPN16_A for fuel system related parameters. Although the figure does not show rail #2 it does show the relationship of rail pressure to other signals. (Obsolete - use SPN 1349)",
+      "units": "MPa",
+      "data_length_bits": 16,
+      "resolution": 256.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 251.0
+      },
+      "type": "Medido",
+      "pgns": [],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 132,
+      "name": "Inlet Air Mass Flow Rate",
+      "description": "Mass flow rate of fresh air entering the engine air intake, before any EGR mixer, if used. Flow rate of fresh air conducted to the engine cylinders to support combustion. Data Length: 2 bytes Resolution: 0.05 kg/h per bit , 0 offset Data Range: 0 to 3212.75 kg/h Vehicle Application Layer - J1939-71 (through December 2001) - p. 41 Type: Measured Suspect Parameter Number: 132 Parameter Group Number: [61450] spn136 - Auxiliary Vacuum Pressure Reading - Identifies the current vacuum pressure (relative to atmosphere) that is configured uniquely per application. Not to be used in place of defined parameters.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65143
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 137,
+      "name": "Auxiliary Gage Pressure Reading 1",
+      "description": "Identifies the current gage pressure (relative to atmosphere) that is configured uniquely per application. Not to be used in place of defined parameters.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65143
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 138,
+      "name": "Auxiliary Absolute Pressure Reading",
+      "description": "Identifies the current absolute pressure (relative to 0 pressure) that is configured uniquely per application. Not to be used in place of defined parameters.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65143
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 141,
+      "name": "Trailer, Tag Or Push Channel Tire Pressure Target",
+      "description": "The tire pressure control system's target gage pressure for the trailer, tag, or push group of tires.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65145
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 142,
+      "name": "Drive Channel Tire Pressure Target",
+      "description": "The tire pressure control system's target gage pressure for the drive group of tires. Data Length: 2 bytes Resolution: 0.5 kPa/bit , 0 offset Vehicle Application Layer - J1939-71 (through December 2001) - p. 42 Data Range: 0 to 32,127.5 kPa Type: Measured Suspect Parameter Number: 142 Parameter Group Number: [65145] spn143 - Steer Channel Tire Pressure Target - The tire pressure control system's target gage pressure for the steer group of tires.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65145
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 144,
+      "name": "Trailer, Tag Or Push Channel Tire Pressure",
+      "description": "The latest gage pressure reading of the trailer, tag, or push group of tires, as opposed to the pressure in each tire.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65146
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 145,
+      "name": "Drive Channel Tire Pressure",
+      "description": "The latest gage pressure reading of the drive group of tires, as opposed to the pressure in each tire.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65146
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 146,
+      "name": "Steel Channel Tire Pressure",
+      "description": "The latest gage pressure reading of the steer group of tires, as opposed to the pressure in each tire.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65146
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 156,
+      "name": "Injector Timing Rail 1 Pressure",
+      "description": "The gage pressure of fuel in the timing rail delivered from the supply pump to the injector timing inlet. See Figure SPN16_A. Data Length: 2 bytes Vehicle Application Layer - J1939-71 (through December 2001) - p. 43 Resolution: 1/256 MPa/bit , 0 offset Data Range: 0 to 251 Mpa Type: Measured Suspect Parameter Number: 156 Parameter Group Number: [65243] spn157 - Injector Metering Rail 1 Pressure - The gage pressure of fuel in the primary, or first, metering rail as delivered from the supply pump to the injector metering inlet. See Figure SPN16_A.",
+      "units": "MPa",
+      "data_length_bits": 16,
+      "resolution": 256.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 251.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65243
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 158,
+      "name": "Battery Potential (Voltage), Switched",
+      "description": "Electrical potential measured at the input of the electronic control unit supplied through a switching device.",
+      "units": "V",
+      "data_length_bits": 16,
+      "resolution": 0.05,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 3212.75
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 159,
+      "name": "Gas Supply Pressure",
+      "description": "Gage pressure of gas supply to fuel metering device.",
+      "units": "kPa",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65277
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 160,
+      "name": "Main Shaft Speed",
+      "description": "Rotational velocity of the first intermediate shaft of the transmission.",
+      "units": "rpm",
+      "data_length_bits": 16,
+      "resolution": 0.125,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 8031.875
+      },
+      "type": "Medido",
+      "pgns": [],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 161,
+      "name": "Input Shaft Speed",
+      "description": "Rotational velocity of the primary shaft transferring power into the transmission. When a torque converter is present, it is the output of the torque converter. Data Length: 2 bytes Resolution: 0.125 rpm/bit , 0 offset Vehicle Application Layer - J1939-71 (through December 2001) - p. 44 Data Range: 0 to 8,031.875 rpm Type: Measured Suspect Parameter Number: 161 Parameter Group Number: [61442] spn162 - Transmission Requested Range - Range selected by the operator. Characters may include P, Rx, Rx-1...R2, R1, R, Nx, Nx-1...N2, N1, N, D, D1, D2..., Dx, L, L1, L2..., Lx-1, 1, 2, 3,... If only one displayed character is required, the second character shall be used and the first character shall be a space (ASCII 32) or a control character (ASCII 0 to 31). If the first character is a control character, refer to the manufacturer's application document for definition.",
+      "units": "per",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": 0.0,
+        "max": 255.0
+      },
+      "type": "Estado",
+      "pgns": [
+        61445
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 163,
+      "name": "Transmission Current Range",
+      "description": "Range currently being commanded by the transmission control system. Characters may include P, Rx, Rx-1...R2, R1, R, Nx, Nx-1...N2, N1, N, D, D1, D2..., Dx, L, L1, L2..., Lx-1, 1, 2, 3,... If only one displayed character is required, the second character shall be used and the first character shall be a space (ASCII 32) or a control character (ASCII 0 to 31). If the first character is a control character, refer to the manufacturer's application document for definition.",
+      "units": "per",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": 0.0,
+        "max": 255.0
+      },
+      "type": "Estado",
+      "pgns": [
+        61445
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 164,
+      "name": "Injection Control Pressure",
+      "description": "The gage pressure of the engine oil in the hydraulic accumulator that powers an intensifier used for fuel injection.",
+      "units": "MPa",
+      "data_length_bits": 16,
+      "resolution": 256.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 251.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65243
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 165,
+      "name": "Compass Bearing",
+      "description": "Present compass bearing of vehicle. Data Length: 2 bytes Resolution: 1/128 deg/bit , 0 offset Data Range: 0 to 501.99 deg Type: Measured Suspect Parameter Number: 165 Parameter Group Number: [65256] Vehicle Application Layer - J1939-71 (through December 2001) - p. 45 spn166 - Rated Engine Power - Net brake power that the engine will deliver continuously, specified for a given application at a rated speed.",
+      "units": "kW",
+      "data_length_bits": 16,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 32127.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65214
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 167,
+      "name": "Alternator Potential (Voltage)",
+      "description": "Electrical potential measured at the alternator output.",
+      "units": "V",
+      "data_length_bits": 16,
+      "resolution": 0.05,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 3212.75
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 168,
+      "name": "Electrical Potential (Voltage)",
+      "description": "Measured electrical potential of the battery.",
+      "units": "V",
+      "data_length_bits": 16,
+      "resolution": 0.05,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 3212.75
+      },
+      "type": "Medido",
+      "pgns": [
+        65271
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 169,
+      "name": "Cargo Ambient Temperature",
+      "description": "Temperature of air inside vehicle container used to accommodate cargo.",
+      "units": "deg",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -273.0,
+        "max": 1735.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65276
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 170,
+      "name": "Cab Interior Temperature",
+      "description": "Temperature of air inside the part of the vehicle that encloses the driver and vehicle operating controls. Note: See SPN 1662 and SPN 1691.",
+      "units": "deg",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -273.0,
+        "max": 1735.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65269
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 171,
+      "name": "Ambient Air Temperature",
+      "description": "Temperature of air surrounding vehicle. Data Length: 2 bytes Vehicle Application Layer - J1939-71 (through December 2001) - p. 46 Resolution: 0.03125 deg C/bit , -273 deg C offset Data Range: -273 to 1735 deg C Type: Measured Suspect Parameter Number: 171 Parameter Group Number: [65269] spn172 - Air Inlet Temperature - Temperature of air entering vehicle air induction system.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65269
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 173,
+      "name": "Exhaust Gas Temperature",
+      "description": "Temperature of combustion byproducts leaving the engine. See SPNs 2433 and 2434 for engines with more than one exhause gas temperature measurement.",
+      "units": "deg",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -273.0,
+        "max": 1735.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65270
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 174,
+      "name": "Fuel Temperature",
+      "description": "Temperature of fuel entering injectors.",
+      "units": "deg",
+      "data_length_bits": 8,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -40.0,
+        "max": 210.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65262
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 175,
+      "name": "Engine Oil Temperature 1",
+      "description": "Temperature of the engine lubricant.",
+      "units": "deg",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -273.0,
+        "max": 1735.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65262
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 176,
+      "name": "Turbo Oil Temperature",
+      "description": "Temperature of the turbocharger lubricant. Data Length: 2 bytes Resolution: 0.03125 deg C/bit , -273 deg C offset Data Range: -273 to 1735 deg C Type: Measured Vehicle Application Layer - J1939-71 (through December 2001) - p. 47 Suspect Parameter Number: 176 Parameter Group Number: [65262] spn177 - Transmission Oil Temperature - Temperature of the transmission lubricant.",
+      "units": "deg",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": -273.0,
+        "max": 1735.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65272
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 180,
+      "name": "Trailer Weight",
+      "description": "Total mass of freight-carrying vehicle designed to be pulled by truck, including the weight of the contents.",
+      "units": "kg",
+      "data_length_bits": 16,
+      "resolution": 2.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 128510.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65258
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 181,
+      "name": "Cargo Weight",
+      "description": "The mass of freight carried.",
+      "units": "kg",
+      "data_length_bits": 16,
+      "resolution": 2.0,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 128510.0
+      },
+      "type": "Medido",
+      "pgns": [
+        65258
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 182,
+      "name": "Trip Fuel",
+      "description": "Fuel consumed during all or part of a journey.",
+      "units": "L",
+      "data_length_bits": 32,
+      "resolution": 0.5,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 2105540607.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65257
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 183,
+      "name": "Fuel Rate",
+      "description": "Amount of fuel consumed by engine per unit of time. Data Length: 2 bytes Resolution: 0.05 L/h per bit , 0 offset Data Range: 0 to 3,212.75 L/h Type: Measured Suspect Parameter Number: 183 Parameter Group Number: [65266] Vehicle Application Layer - J1939-71 (through December 2001) - p. 48 spn184 - Instantaneous Fuel Economy - Current fuel economy at current vehicle velocity.",
+      "units": "km",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": 0.0,
+        "max": 125.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65266
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 185,
+      "name": "Average Fuel Economy",
+      "description": "Average of instantaneous fuel economy for that segment of vehicle operation of interest.",
+      "units": "km",
+      "data_length_bits": 16,
+      "resolution": null,
+      "offset": null,
+      "range": {
+        "min": 0.0,
+        "max": 125.5
+      },
+      "type": "Medido",
+      "pgns": [
+        65266
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 186,
+      "name": "Power Takeoff Speed",
+      "description": "Rotational velocity of device used to transmit engine power to auxiliary equipment.",
+      "units": "rpm",
+      "data_length_bits": 16,
+      "resolution": 0.125,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 8031.875
+      },
+      "type": "Medido",
+      "pgns": [
+        65264
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 187,
+      "name": "Power Takeoff Set Speed",
+      "description": "Rotational velocity selected by operator for device used to transmit engine power to auxiliary equipment.",
+      "units": "rpm",
+      "data_length_bits": 16,
+      "resolution": 0.125,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 8031.875
+      },
+      "type": "Medido",
+      "pgns": [
+        65264
+      ],
+      "states": null,
+      "notes": null
+    },
+    {
+      "spn": 188,
+      "name": "Engine Speed At Idle, Point 1 (Engine Configuration)",
+      "description": "Stationary low idle speed of engine which includes influences due to engine temperature (after power up) and other stationary changes (calibration offsets, sensor failures, etc). This parameter is point 1 of the engine configuration map (see PGN 65251).",
+      "units": "rpm",
+      "data_length_bits": 16,
+      "resolution": 0.125,
+      "offset": 0.0,
+      "range": {
+        "min": 0.0,
+        "max": 8031.875
+      },
+      "type": "Medido",
+      "pgns": [
+        65251
+      ],
+      "states": null,
+      "notes": null
+    }
+  ],
+  "pgns": [
+    {
+      "pgn": 65263,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 100,
+          "name": "Engine Oil Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 4.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 101,
+          "name": "Crankcase Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": null,
+          "scale": null,
+          "offset": null,
+          "min": null,
+          "max": null,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 111,
+          "name": "Coolant Level",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "%",
+          "scale": 0.4,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 100.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 111,
+          "name": "Coolant Level",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "%",
+          "scale": 0.4,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 100.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65270,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 102,
+          "name": "Boost Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 2.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 500.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 104,
+          "name": "Turbocharger Lube Oil Pressure 1",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 106,
+          "name": "Air Inlet Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 2.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 500.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 107,
+          "name": "Air Filter 1 Differential Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.05,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 12.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 112,
+          "name": "Coolant Filter Differential Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 125.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 112,
+          "name": "Coolant Filter Differential Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 125.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 173,
+          "name": "Exhaust Gas Temperature",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -273.0,
+          "max": 1735.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65245,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 103,
+          "name": "Turbocharger 1 Speed",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "rpm",
+          "scale": 4.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 257020.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65269,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 108,
+          "name": "Barometric Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 125.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 170,
+          "name": "Cab Interior Temperature",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -273.0,
+          "max": 1735.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 171,
+          "name": "Ambient Air Temperature",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65262,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 109,
+          "name": "Coolant Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 110,
+          "name": "Engine Coolant Temperature",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 174,
+          "name": "Fuel Temperature",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 175,
+          "name": "Engine Oil Temperature 1",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -273.0,
+          "max": 1735.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65271,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 114,
+          "name": "Net Battery Current",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "A",
+          "scale": null,
+          "offset": null,
+          "min": -125.0,
+          "max": 125.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 115,
+          "name": "Alternator Current",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "A",
+          "scale": 1.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 250.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 114,
+          "name": "Net Battery Current",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "A",
+          "scale": null,
+          "offset": null,
+          "min": -125.0,
+          "max": 125.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 115,
+          "name": "Alternator Current",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "A",
+          "scale": 1.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 250.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 158,
+          "name": "Battery Potential (Voltage), Switched",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "V",
+          "scale": 0.05,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 3212.75,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 167,
+          "name": "Alternator Potential (Voltage)",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "V",
+          "scale": 0.05,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 3212.75,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 168,
+          "name": "Electrical Potential (Voltage)",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "V",
+          "scale": 0.05,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 3212.75,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65274,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 116,
+          "name": "Brake Application Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 4.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 117,
+          "name": "Brake Primary Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 4.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 118,
+          "name": "Brake Secondary Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 4.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65275,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 119,
+          "name": "Hydraulic Retarder Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 16.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 4000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 120,
+          "name": "Hydraulic Retarder Oil Temperature",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -40.0,
+          "max": 210.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65272,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 123,
+          "name": "Clutch Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "%",
+          "scale": 0.4,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 100.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 126,
+          "name": "Transmission Filter Differential Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 2.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 500.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 127,
+          "name": "Transmission Oil Pressure",
+          "start_bit": null,
+          "length": 8,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 16.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 4000.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 176,
+          "name": "Turbo Oil Temperature",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -273.0,
+          "max": 1735.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65143,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 132,
+          "name": "Inlet Air Mass Flow Rate",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 137,
+          "name": "Auxiliary Gage Pressure Reading 1",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 138,
+          "name": "Auxiliary Absolute Pressure Reading",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65145,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 141,
+          "name": "Trailer, Tag Or Push Channel Tire Pressure Target",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 142,
+          "name": "Drive Channel Tire Pressure Target",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65146,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 144,
+          "name": "Trailer, Tag Or Push Channel Tire Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 145,
+          "name": "Drive Channel Tire Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 146,
+          "name": "Steel Channel Tire Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65243,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 156,
+          "name": "Injector Timing Rail 1 Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "MPa",
+          "scale": 256.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 251.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 164,
+          "name": "Injection Control Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "MPa",
+          "scale": 256.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 251.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65277,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 159,
+          "name": "Gas Supply Pressure",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kPa",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 61445,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 161,
+          "name": "Input Shaft Speed",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "per",
+          "scale": null,
+          "offset": null,
+          "min": 0.0,
+          "max": 255.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 163,
+          "name": "Transmission Current Range",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "per",
+          "scale": null,
+          "offset": null,
+          "min": 0.0,
+          "max": 255.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65214,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 165,
+          "name": "Compass Bearing",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kW",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 32127.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65276,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 169,
+          "name": "Cargo Ambient Temperature",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "deg",
+          "scale": null,
+          "offset": null,
+          "min": -273.0,
+          "max": 1735.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65258,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 180,
+          "name": "Trailer Weight",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kg",
+          "scale": 2.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 128510.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 181,
+          "name": "Cargo Weight",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "kg",
+          "scale": 2.0,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 128510.0,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65257,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 182,
+          "name": "Trip Fuel",
+          "start_bit": null,
+          "length": 32,
+          "endianness": "Intel",
+          "units": "L",
+          "scale": 0.5,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 2105540607.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65266,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 183,
+          "name": "Fuel Rate",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "km",
+          "scale": null,
+          "offset": null,
+          "min": 0.0,
+          "max": 125.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 185,
+          "name": "Average Fuel Economy",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "km",
+          "scale": null,
+          "offset": null,
+          "min": 0.0,
+          "max": 125.5,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65264,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 186,
+          "name": "Power Takeoff Speed",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "rpm",
+          "scale": 0.125,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 8031.875,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        },
+        {
+          "spn": 187,
+          "name": "Power Takeoff Set Speed",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "rpm",
+          "scale": 0.125,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 8031.875,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    },
+    {
+      "pgn": 65251,
+      "name": null,
+      "data_length_bytes": null,
+      "data_page": null,
+      "pdu_format": null,
+      "pdu_specific": null,
+      "default_priority": null,
+      "transmission_rate": null,
+      "signals": [
+        {
+          "spn": 188,
+          "name": "Engine Speed At Idle, Point 1 (Engine Configuration)",
+          "start_bit": null,
+          "length": 16,
+          "endianness": "Intel",
+          "units": "rpm",
+          "scale": 0.125,
+          "offset": 0.0,
+          "min": 0.0,
+          "max": 8031.875,
+          "dbc_link": {
+            "message": null,
+            "signal": null
+          }
+        }
+      ],
+      "notes": "Estructura mínima inferida; completar con DBC."
+    }
+  ],
+  "traceability": {
+    "sections": {
+      "5.1": "Directrices generales (latencia, formato, charset, rangos, slots, agrupación, tasas, nomenclatura, multi-fuente).",
+      "5.2": "Definiciones de parámetros (SPN): nombre, descripción, longitud, escala, rango, tipo, SPN, PGN.",
+      "5.3": "Definiciones de grupos (PGN): nombre, tasa, longitud, DP/PDU, prioridad, lista de SPNs con posiciones."
+    }
+  }
+}
